@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2kq-bdx@+qg7qeeixn*@_0y63(@5514aqc#c=t3$1%q+9j*8_d'
+SECRET_KEY = 'django-insecure-+l!!l9vbexhohx$pq0i$922ammbt6vd+_u0bsin7bkcms02(!t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'recipes',
 ]
 
 MIDDLEWARE = [
@@ -75,11 +76,11 @@ WSGI_APPLICATION = 'cookbook.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydb',
-        'USER': 'postgres',
-        'PASSWORD': 'catparol',
-        'HOST': 'localhost',
-        'PORT': '6666',
+        'NAME': 'cookbook_db',
+        'USER': 'postgres',         
+        'PASSWORD': 'dogparol',  
+        'HOST': '127.0.0.1',         
+        'PORT': '5432',
     }
 }
 
