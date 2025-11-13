@@ -1,5 +1,5 @@
 from typing import Sequence
-
+from django.db.models import Count, Sum
 
 class RepoManagerBase:
     """
@@ -97,3 +97,38 @@ class RecipeItemManager(RepoManagerBase):
             recipe=recipe,
             select_related=("ingredient", "unit"),
         )
+        
+    def recipes_summary(self):
+        """
+        Return aggregated data per recipe.
+
+        For each recipe:
+        - recipe_id
+        - title
+        - category_name (or None)
+        - items_count (how many RecipeItem rows)
+        - total_quantity (sum of quantities, may be None)
+
+        Returns a plain Python list of dicts, ready for JSON.
+        """
+        qs = (
+            self.repo.model.objects  # RecipeItem model
+            .select_related("recipe", "recipe__category")
+            .values("recipe_id", "recipe__title", "recipe__category__name")
+            .annotate(
+                items_count=Count("id"),
+                total_quantity=Sum("quantity"),
+            )
+            .order_by("recipe__title")
+        )
+
+        result = []
+        for row in qs:
+            result.append({
+                "recipe_id": row["recipe_id"],
+                "title": row["recipe__title"],
+                "category": row["recipe__category__name"],
+                "items_count": row["items_count"],
+                "total_quantity": row["total_quantity"],
+            })
+        return result

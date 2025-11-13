@@ -22,6 +22,7 @@ from recipes.API.viewsets import (
     IngredientCategoryViewSet, RecipeCategoryViewSet,
     UnitViewSet, RecipeItemViewSet,
 )
+from recipes.API.manage_api import recipes_summary_view
 
 router = DefaultRouter()
 router.register(r'ingredients', IngredientViewSet, basename='ingredient')
@@ -34,4 +35,5 @@ router.register(r'items', RecipeItemViewSet, basename='recipe-item')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/report/recipes-summary/', recipes_summary_view, name='recipes-summary'),
 ]
