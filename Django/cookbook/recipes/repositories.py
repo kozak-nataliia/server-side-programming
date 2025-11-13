@@ -1,34 +1,31 @@
 from __future__ import annotations
-from typing import Iterable, Optional, Type, TypeVar, Generic, Dict, Any, Sequence
+
+from typing import Type, TypeVar, Generic
 from django.db import transaction
-from django.db.models import Model, QuerySet
+from django.db.models import Model
 
 T = TypeVar("T", bound=Model)
 
+
 class BaseRepository(Generic[T]):
-    """Tiny repository wrapper around Django ORM (swappable data source later)."""
+    """
+    wrapper over Django ORM.
+
+    Only:
+      - get (single object)
+      - create
+      - update
+      - delete
+      - exists
+    """
 
     def __init__(self, model: Type[T]) -> None:
         self.model = model
 
+    # --- basic CRUD / exists ---
+
     def get(self, **filters) -> T:
         return self.model.objects.get(**filters)
-
-    def list(
-        self,
-        filters: Optional[Dict[str, Any]] = None,
-        order_by: Optional[Sequence[str]] = None,
-        select_related: Optional[Sequence[str]] = None,
-        limit: Optional[int] = None,
-    ) -> QuerySet[T]:
-        qs: QuerySet[T] = self.model.objects.all()
-        if filters:
-            qs = qs.filter(**filters)
-        if select_related:
-            qs = qs.select_related(*select_related)
-        if order_by:
-            qs = qs.order_by(*order_by)
-        return qs[:limit] if limit else qs
 
     @transaction.atomic
     def create(self, **data) -> T:
@@ -45,16 +42,17 @@ class BaseRepository(Generic[T]):
     def delete(self, obj: T) -> None:
         obj.delete()
 
-    def get_or_create(self, defaults: Optional[Dict[str, Any]] = None, **lookup) -> T:
-        obj, _ = self.model.objects.get_or_create(defaults=defaults or {}, **lookup)
-        return obj
-    
-    def get_by_id(self, pk: int) -> T:
-        return self.model.objects.get(pk=pk)
+    def exists(self, **filters) -> bool:
+        return self.model.objects.filter(**filters).exists()
 
-
-# --- Concrete repos (explicit types, easy to import in demo) ---
-from .models import IngredientCategory, RecipeCategory, Unit, Ingredient, Recipe, RecipeItem  # noqa: E402
+from .models import (
+    IngredientCategory,
+    RecipeCategory,
+    Unit,
+    Ingredient,
+    Recipe,
+    RecipeItem,
+)
 
 
 class IngredientCategoryRepo(BaseRepository[IngredientCategory]):
@@ -86,16 +84,12 @@ class RecipeItemRepo(BaseRepository[RecipeItem]):
     def __init__(self) -> None:
         super().__init__(RecipeItem)
 
-    def add_item(self, *, recipe: Recipe, ingredient: Ingredient, quantity, unit: Optional[Unit]):
-        return self.create(recipe=recipe, ingredient=ingredient, quantity=quantity, unit=unit)
-
-    def items_for(self, recipe: Recipe) -> Iterable[RecipeItem]:
-        return self.list(filters={"recipe": recipe}, select_related=("ingredient", "unit"))
 
 class RepositoryHub:
     """
-    Single entry point to all entities and their methods.
+    Single entry point to all repositories.
     """
+
     def __init__(self) -> None:
         self.ingredient_categories = IngredientCategoryRepo()
         self.recipe_categories = RecipeCategoryRepo()
@@ -103,3 +97,11 @@ class RepositoryHub:
         self.ingredients = IngredientRepo()
         self.recipes = RecipeRepo()
         self.items = RecipeItemRepo()
+
+    def delete_all(self) -> None:
+        self.items.model.objects.all().delete()
+        self.recipes.model.objects.all().delete()
+        self.ingredients.model.objects.all().delete()
+        self.units.model.objects.all().delete()
+        self.ingredient_categories.model.objects.all().delete()
+        self.recipe_categories.model.objects.all().delete()

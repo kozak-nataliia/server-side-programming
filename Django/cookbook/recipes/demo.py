@@ -1,6 +1,6 @@
 """
-Run:
-  python3 -m recipes.demo
+Run from the folder with manage.py:
+    python -m recipes.demo
 """
 import os
 import django
@@ -8,89 +8,97 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cookbook.settings")
 django.setup()
 
-from recipes.repositories import RepositoryHub 
-
-
-def reset_demo():
-    from recipes.models import (
-        RecipeItem, Recipe, Ingredient, Unit, IngredientCategory, RecipeCategory
-    )
-    RecipeItem.objects.all().delete()
-    Recipe.objects.all().delete()
-    Ingredient.objects.all().delete()
-    Unit.objects.all().delete()
-    IngredientCategory.objects.all().delete()
-    RecipeCategory.objects.all().delete()
-
-
-def by_id(repo, pk):
-    """Search by ID (works whether repo has get_by_id or not)."""
-    if hasattr(repo, "get_by_id"):
-        return repo.get_by_id(pk)
-    return repo.get(id=pk)
+from recipes.repositories import RepositoryHub
+from recipes.managers import (
+    RecipeCategoryManager,
+    IngredientCategoryManager,
+    UnitManager,
+    IngredientManager,
+    RecipeManager,
+    RecipeItemManager,
+)
 
 
 def main():
-    repo = RepositoryHub()  # single entry point to all entities & methods
+    repo = RepositoryHub()
+    repo.delete_all()  # clean for demo
 
-    # -------------------------------
-    # WRITE ONE (add) and SHOW result
-    # -------------------------------
-    breakfast = repo.recipe_categories.get_or_create(name="Breakfast")
-    dairy = repo.ingredient_categories.get_or_create(name="Dairy")
-    veg = repo.ingredient_categories.get_or_create(name="Vegetable")
+    recipe_cat_manager = RecipeCategoryManager(repo.recipe_categories)
+    ingredient_cat_manager = IngredientCategoryManager(repo.ingredient_categories)
+    unit_manager = UnitManager(repo.units)
+    ingredient_manager = IngredientManager(repo.ingredients)
+    recipe_manager = RecipeManager(repo.recipes)
+    recipe_item_manager = RecipeItemManager(repo.items)
 
-    gram = repo.units.get_or_create(name="gram", defaults={"symbol": "g"})
-    piece = repo.units.get_or_create(name="piece", defaults={"symbol": "pc"})
+    # ---------- CREATE ----------
+    breakfast = recipe_cat_manager.get_or_create(name="Breakfast")
+    dairy = ingredient_cat_manager.get_or_create(name="Dairy")
+    veg = ingredient_cat_manager.get_or_create(name="Vegetable")
 
-    egg = repo.ingredients.get_or_create(name="Egg", defaults={"category": dairy})
-    tomato = repo.ingredients.get_or_create(name="Tomato", defaults={"category": veg})
-    milk = repo.ingredients.get_or_create(name="Milk", defaults={"category": dairy})
+    gram = unit_manager.get_or_create(name="gram", defaults={"symbol": "g"})
+    piece = unit_manager.get_or_create(name="piece", defaults={"symbol": "pc"})
 
-    omelette = repo.recipes.get_or_create(
+    egg = ingredient_manager.get_or_create(name="Egg", defaults={"category": dairy})
+    tomato = ingredient_manager.get_or_create(name="Tomato", defaults={"category": veg})
+    milk = ingredient_manager.get_or_create(name="Milk", defaults={"category": dairy})
+
+    omelette = recipe_manager.get_or_create(
         title="Simple Omelette",
-        defaults={"category": breakfast, "instructions": "Beat eggs, fry, fold. Salt to taste."},
+        defaults={
+            "category": breakfast,
+            "instructions": "Beat eggs, fry, fold. Salt to taste.",
+        },
     )
+
     print(f"[ADD] Category: {breakfast.id} {breakfast}")
     print(f"[ADD] Ingredient: {egg.id} {egg}")
     print(f"[ADD] Recipe: {omelette.id} {omelette}")
 
-    # ensure items exist (idempotent)
-    if not repo.items.list(filters={"recipe": omelette}).exists():
-        repo.items.add_item(recipe=omelette, ingredient=egg, quantity=3, unit=piece)
-        repo.items.add_item(recipe=omelette, ingredient=tomato, quantity=50, unit=gram)
-        repo.items.add_item(recipe=omelette, ingredient=milk, quantity=30, unit=gram)
+    if not recipe_item_manager.exists(recipe=omelette):
+        recipe_item_manager.create(
+            recipe=omelette,
+            ingredient=egg,
+            quantity=3,
+            unit=piece,
+        )
+        recipe_item_manager.create(
+            recipe=omelette,
+            ingredient=tomato,
+            quantity=50,
+            unit=gram,
+        )
+        recipe_item_manager.create(
+            recipe=omelette,
+            ingredient=milk,
+            quantity=30,
+            unit=gram,
+        )
         print("[ADD] 3 items added for recipe")
 
-    # -------------------------------
-    # READ (all) and PRINT to screen
-    # (demonstrate at least 3 entities)
-    # -------------------------------
+    # ---------- READ & PRINT ----------
     print("\n[READ] All Recipe Categories:")
-    for c in repo.recipe_categories.list(order_by=["name"]):
+    for c in recipe_cat_manager.list(order_by=["name"]):
         print(f" - {c.id}: {c.name}")
 
     print("\n[READ] All Ingredients:")
-    for ing in repo.ingredients.list(select_related=("category",), order_by=["name"]):
+    for ing in ingredient_manager.list(
+        select_related=("category",), order_by=["name"]
+    ):
         cat = ing.category.name if ing.category_id else "—"
         print(f" - {ing.id}: {ing.name} (cat: {cat})")
 
     print("\n[READ] All Recipes:")
-    for r in repo.recipes.list(order_by=["title"]):
+    for r in recipe_manager.list(order_by=["title"]):
         print(f" - {r.id}: {r.title}")
 
-    # -------------------------------
-    # SEARCH BY ID and PRINT
-    # -------------------------------
-    found = by_id(repo.recipes, omelette.id)
+    found = recipe_manager.by_id(omelette.id)
     print(f"\n[SEARCH BY ID] Recipe {found.id}: {found.title}")
 
     print("\n[READ] Items for the found recipe:")
-    for it in repo.items.items_for(found):
-        unit = f"{it.unit}" if it.unit else ""
-        print(f" - {it.quantity} {unit} {it.ingredient.name}".strip())
+    for it in recipe_item_manager.for_recipe(found):
+        unit_str = f"{it.unit}" if it.unit else ""
+        print(f" - {it.quantity} {unit_str} {it.ingredient.name}".strip())
 
 
 if __name__ == "__main__":
-    reset_demo()
     main()
