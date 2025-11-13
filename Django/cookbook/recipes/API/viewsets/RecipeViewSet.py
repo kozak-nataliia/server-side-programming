@@ -1,12 +1,12 @@
 from rest_framework import viewsets
-from serializers import RecipeSerializer
-from Django.cookbook.recipes.API.manage_api import recipe_manager
+from recipes.API.serializers import RecipeSerializer
+from recipes.API.manage_api import recipe_manager
 
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
 
     def get_queryset(self):
-        return recipe_manager.list(order_by=["name"])
+        return recipe_manager.list(order_by=["title"])
 
     def perform_create(self, serializer):
         return recipe_manager.create(**serializer.validated_data)

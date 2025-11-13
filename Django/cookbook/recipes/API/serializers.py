@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from models import (
+from recipes.models import (
     IngredientCategory, RecipeCategory, Unit,
     Ingredient, Recipe, RecipeItem
 )

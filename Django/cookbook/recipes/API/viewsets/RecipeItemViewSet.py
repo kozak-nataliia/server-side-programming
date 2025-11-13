@@ -1,8 +1,8 @@
 from rest_framework import viewsets
-from serializers import RecipeItemSerializer
-from Django.cookbook.recipes.API.manage_api import recipe_item_manager
+from recipes.API.serializers import RecipeItemSerializer
+from recipes.API.manage_api import recipe_item_manager
 
-class IngredientViewSet(viewsets.ModelViewSet):
+class RecipeItemViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeItemSerializer
 
     def get_queryset(self):

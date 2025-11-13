@@ -49,6 +49,14 @@ def main():
             "instructions": "Beat eggs, fry, fold. Salt to taste.",
         },
     )
+    
+    cake = recipe_manager.get_or_create(
+        title="Cake",
+        defaults={
+            "category": breakfast,
+            "instructions": "Mix everything and bake",
+        },
+    )
 
     print(f"[ADD] Category: {breakfast.id} {breakfast}")
     print(f"[ADD] Ingredient: {egg.id} {egg}")
