@@ -15,8 +15,25 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from recipes.API.viewsets import (
+    IngredientViewSet, RecipeViewSet,
+    IngredientCategoryViewSet, RecipeCategoryViewSet,
+    UnitViewSet, RecipeItemViewSet,
+)
+from recipes.API.manage_api import recipes_summary_view
+
+router = DefaultRouter()
+router.register(r'ingredients', IngredientViewSet, basename='ingredient')
+router.register(r'recipes', RecipeViewSet, basename='recipe')
+router.register(r'ingredient-categories', IngredientCategoryViewSet, basename='ingredient-category')
+router.register(r'recipe-categories', RecipeCategoryViewSet, basename='recipe-category')
+router.register(r'units', UnitViewSet, basename='unit')
+router.register(r'items', RecipeItemViewSet, basename='recipe-item')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    path('api/report/recipes-summary/', recipes_summary_view, name='recipes-summary'),
 ]
