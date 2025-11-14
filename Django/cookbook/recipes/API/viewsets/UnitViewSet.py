@@ -6,7 +6,7 @@ class UnitViewSet(viewsets.ModelViewSet):
     serializer_class = UnitSerializer
 
     def get_queryset(self):
-        return unit_manager.list(order_by=["name"])
+        return unit_manager.list(order_by=["id"])
 
     def perform_create(self, serializer):
         return unit_manager.create(**serializer.validated_data)

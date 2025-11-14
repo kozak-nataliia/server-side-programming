@@ -6,7 +6,7 @@ class RecipeCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeCategorySerializer
 
     def get_queryset(self):
-        return recipe_cat_manager.list(order_by=["name"])
+        return recipe_cat_manager.list(order_by=["id"])
 
     def perform_create(self, serializer):
         return recipe_cat_manager.create(**serializer.validated_data)

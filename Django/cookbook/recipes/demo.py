@@ -57,6 +57,19 @@ def main():
             "instructions": "Mix everything and bake",
         },
     )
+    if not recipe_item_manager.exists(recipe=cake):
+        recipe_item_manager.create(
+            recipe=cake,
+            ingredient=egg,
+            quantity=5,
+            unit=piece,
+        )
+        recipe_item_manager.create(
+            recipe=cake,
+            ingredient=milk,
+            quantity=200,
+            unit=gram,
+        )
 
     print(f"[ADD] Category: {breakfast.id} {breakfast}")
     print(f"[ADD] Ingredient: {egg.id} {egg}")

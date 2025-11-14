@@ -100,35 +100,76 @@ class RecipeItemManager(RepoManagerBase):
         
     def recipes_summary(self):
         """
-        Return aggregated data per recipe.
+        Build a 'ready-to-cook' summary for each recipe.
 
-        For each recipe:
-        - recipe_id
-        - title
-        - category_name (or None)
-        - items_count (how many RecipeItem rows)
-        - total_quantity (sum of quantities, may be None)
+        Returns a list of dicts:
 
-        Returns a plain Python list of dicts, ready for JSON.
+        [
+          {
+            "id": 1,
+            "title": "Simple Omelette",
+            "category": "Breakfast",
+            "instructions": "Beat eggs, fry, fold. Salt to taste.",
+            "items": [
+              {"ingredient": "Egg", "quantity": 3, "unit": "pc"},
+              {"ingredient": "Tomato", "quantity": 50, "unit": "g"},
+              ...
+            ],
+            "items_count": 3,
+            "total_quantity": 83
+          },
+          ...
+        ]
         """
+        # Get all items with related recipe, category, ingredient and unit
         qs = (
-            self.repo.model.objects  # RecipeItem model
-            .select_related("recipe", "recipe__category")
-            .values("recipe_id", "recipe__title", "recipe__category__name")
-            .annotate(
-                items_count=Count("id"),
-                total_quantity=Sum("quantity"),
-            )
-            .order_by("recipe__title")
+            self.repo.model.objects
+            .select_related("recipe", "recipe__category", "ingredient", "unit")
+            .order_by("recipe__title", "id")
         )
 
-        result = []
-        for row in qs:
-            result.append({
-                "recipe_id": row["recipe_id"],
-                "title": row["recipe__title"],
-                "category": row["recipe__category__name"],
-                "items_count": row["items_count"],
-                "total_quantity": row["total_quantity"],
+        # We'll accumulate data per recipe_id
+        recipes_map: dict[int, dict] = {}
+
+        for item in qs:
+            r = item.recipe
+            recipe_id = r.id
+
+            # If we haven't seen this recipe yet – create base entry
+            if recipe_id not in recipes_map:
+                recipes_map[recipe_id] = {
+                    "id": recipe_id,
+                    "title": r.title,
+                    "category": r.category.name if r.category_id else None,
+                    "instructions": r.instructions,
+                    "items": [],
+                    "items_count": 0,
+                    "total_quantity": 0,
+                }
+
+            entry = recipes_map[recipe_id]
+
+            # Decide what to show for unit; symbol is nicer if present
+            unit_obj = item.unit
+            if unit_obj is not None:
+                unit_str = unit_obj.symbol or unit_obj.name
+            else:
+                unit_str = None
+
+            # Add ingredient line
+            entry["items"].append({
+                "ingredient": item.ingredient.name if item.ingredient_id else None,
+                "quantity": item.quantity,
+                "unit": unit_str,
             })
-        return result
+
+            # Update counters
+            entry["items_count"] += 1
+            if item.quantity is not None:
+                entry["total_quantity"] += item.quantity
+
+        # Convert map -> list sorted by recipe title
+        recipes_list = list(recipes_map.values())
+        recipes_list.sort(key=lambda r: r["title"] or "")
+
+        return recipes_list

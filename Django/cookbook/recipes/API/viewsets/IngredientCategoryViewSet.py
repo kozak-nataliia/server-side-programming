@@ -6,7 +6,7 @@ class IngredientCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientCategorySerializer
 
     def get_queryset(self):
-        return ingredient_cat_manager.list(order_by=["name"])
+        return ingredient_cat_manager.list(order_by=["id"])
 
     def perform_create(self, serializer):
         return ingredient_cat_manager.create(**serializer.validated_data)
