@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 venv
 rest_api_6-principles.txt
-.vscode
+.vscode/
+.postman/

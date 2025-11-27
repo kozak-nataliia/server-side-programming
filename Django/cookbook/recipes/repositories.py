@@ -35,7 +35,7 @@ class BaseRepository(Generic[T]):
     def update(self, obj: T, **data) -> T:
         for k, v in data.items():
             setattr(obj, k, v)
-        obj.save(update_fields=list(data.keys()))
+        obj.save()
         return obj
 
     @transaction.atomic

@@ -1,0 +1,19 @@
+from rest_framework import viewsets
+from recipes.API.serializers import RecipeCategorySerializer
+from recipes.API.manage_api import recipe_cat_manager
+
+class RecipeCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = RecipeCategorySerializer
+
+    def get_queryset(self):
+        return recipe_cat_manager.list(order_by=["id"])
+
+    def perform_create(self, serializer):
+        return recipe_cat_manager.create(**serializer.validated_data)
+
+    def perform_update(self, serializer):
+        obj = self.get_object()
+        return recipe_cat_manager.update(obj, **serializer.validated_data)
+
+    def perform_destroy(self, instance):
+        return recipe_cat_manager.delete(instance)
