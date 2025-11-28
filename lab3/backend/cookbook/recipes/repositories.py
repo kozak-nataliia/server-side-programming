@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Type, TypeVar, Generic
 from django.db import transaction
+from django.db import connection
 from django.db.models import Model
 
 T = TypeVar("T", bound=Model)
@@ -99,9 +100,14 @@ class RepositoryHub:
         self.items = RecipeItemRepo()
 
     def delete_all(self) -> None:
-        self.items.model.objects.all().delete()
-        self.recipes.model.objects.all().delete()
-        self.ingredients.model.objects.all().delete()
-        self.units.model.objects.all().delete()
-        self.ingredient_categories.model.objects.all().delete()
-        self.recipe_categories.model.objects.all().delete()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                TRUNCATE TABLE
+                    recipes_recipeitem,
+                    recipes_recipe,
+                    recipes_ingredient,
+                    recipes_unit,
+                    recipes_ingredientcategory,
+                    recipes_recipecategory
+                RESTART IDENTITY CASCADE;
+            """)
