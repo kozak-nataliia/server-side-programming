@@ -1,35 +1,51 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = "http://127.0.0.1:8000/api";
 
 function RecipeListPage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const { token, logout } = useAuth();
 
   useEffect(() => {
+    if (!token) return; // захищаємося від моменту, коли токен ще не зчитався
+
     async function load() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/recipes/`);
+        const res = await fetch(`${API_BASE}/recipes/`, {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.status === 401) {
+          // токен протух → логаут
+          logout();
+          throw new Error("Session expired. Please log in again.");
+        }
+
         if (!res.ok) {
-          throw new Error('Failed to load recipes');
+          throw new Error("Failed to load recipes");
         }
         const data = await res.json();
         setRecipes(data);
       } catch (e) {
-        setError(e.message || 'Error loading recipes');
+        setError(e.message || "Error loading recipes");
       } finally {
         setLoading(false);
       }
     }
 
     load();
-  }, []);
+  }, [token, logout]);
 
   if (loading) return <p>Loading recipes...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <section className="page">
@@ -38,7 +54,9 @@ function RecipeListPage() {
         Click <strong>Details</strong> to view, edit or delete a recipe.
       </p>
 
-      {recipes.length === 0 && <p>No recipes yet. Be the first to add one! 🍰</p>}
+      {recipes.length === 0 && (
+        <p>No recipes yet. Be the first to add one! 🍰</p>
+      )}
 
       <ul className="recipe-list">
         {recipes.map((r) => (
