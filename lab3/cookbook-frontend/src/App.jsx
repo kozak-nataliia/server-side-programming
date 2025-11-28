@@ -3,9 +3,9 @@ import "./App.css";
 import RecipeListPage from "./pages/RecipeListPage.jsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.jsx";
 import RecipeFormPage from "./pages/RecipeFormPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";          // 🔹 додали
-import ProtectedRoute from "./auth/ProtectedRoute.jsx"; // 🔹 додали
-import { useAuth } from "./auth/AuthContext.jsx";       // 🔹 додали
+import LoginPage from "./pages/LoginPage.jsx";         
+import ProtectedRoute from "./auth/ProtectedRoute.jsx"; 
+import { useAuth } from "./auth/AuthContext.jsx";       
 
 function App() {
   const { token, logout } = useAuth(); // 🔹 знаємо, залогінений юзер чи ні
