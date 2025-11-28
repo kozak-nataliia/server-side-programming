@@ -1,9 +1,11 @@
 from rest_framework import viewsets
 from recipes.API.serializers import RecipeCategorySerializer
+from rest_framework.permissions import AllowAny
 from recipes.API.manage_api import recipe_cat_manager
 
 class RecipeCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeCategorySerializer
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         return recipe_cat_manager.list(order_by=["id"])

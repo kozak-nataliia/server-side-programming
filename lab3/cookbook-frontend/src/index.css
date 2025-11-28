@@ -1,174 +1,65 @@
-/* Шрифти */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap');
+/* src/index.css */
+
+/* Reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
-  --bg1: #f4c9ff;
-  --bg2: #c2d6ff;
-  --card-bg: rgba(255, 255, 255, 0.92);
-  --text-main: #2b1b3b;   /* темний, добре читабельний */
-  --muted: #6b5c82;
-  --pink: #ff4fa3;
-  --pink-soft: #ff7fbc;
-  --blue: #4f8dff;
-  --border-soft: rgba(255, 255, 255, 0.9);
+  --bg-gradient: radial-gradient(circle at 0% 0%, #ffe1ff 0, #f3d4ff 25%, #d6ccff 50%, #bad7ff 75%, #ffe6ff 100%);
+  --accent-pink: #ff5bbd;
+  --accent-pink-soft: #ff8ed4;
+  --accent-purple: #7c4dff;
+  --accent-lilac: #c79bff;
+  --text-main: #2a1330;
+  --text-muted: #754b85;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-bg-soft: rgba(255, 255, 255, 0.5);
+  --border-radius-lg: 24px;
+  --border-radius-md: 16px;
+  --shadow-soft: 0 18px 40px rgba(151, 97, 190, 0.35);
+  --shadow-tiny: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --transition-fast: 0.18s ease-out;
+}
 
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  color: var(--text-main);
-  background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-  background-attachment: fixed;
-  line-height: 1.6;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html,
+body {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  display: flex;
-  place-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-/* Vite root */
-#root {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-/* Центральна картка, щоб текст не “плавав” по фоні */
-.main-card {
-  background: var(--card-bg);
-  border-radius: 24px;
-  padding: 40px 48px 32px;
-  max-width: 640px;
-  width: 100%;
-  text-align: center;
-  box-shadow:
-    0 18px 45px rgba(96, 59, 128, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.7);
-  border: 1px solid var(--border-soft);
-}
-
-/* Заголовок */
-h1 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 3rem;
-  margin: 0 0 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--pink);
-  text-shadow: 0 3px 10px rgba(255, 79, 163, 0.35);
-}
-
-/* Підзаголовки / дрібний текст */
-p,
-span,
-small {
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-strong {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: var(--bg-gradient);
   color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
 }
 
-/* Логотипи зверху */
-.logo {
-  height: 6rem;
-  padding: 1rem;
-  transition: transform 0.25s ease, filter 0.25s ease;
+/* root розтягується на всю висоту */
+#root {
+  flex: 1;
+  display: flex;
 }
 
-.logo:hover {
-  transform: translateY(-4px) scale(1.03);
-  filter: drop-shadow(0 0 10px rgba(255, 127, 188, 0.6));
-}
-
-/* Кнопка */
-button {
-  margin-top: 18px;
-  border-radius: 999px;
-  border: none;
-  padding: 0.75em 2.4em;
-  font-size: 1rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-
-  background: linear-gradient(135deg, var(--pink), var(--pink-soft));
-  color: #ffffff;
-
-  cursor: pointer;
-  box-shadow:
-    0 10px 22px rgba(255, 79, 163, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.7);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 14px 30px rgba(255, 79, 163, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.9);
-  filter: brightness(1.03);
-}
-
-button:active {
-  transform: translateY(0);
-  box-shadow:
-    0 8px 20px rgba(255, 79, 163, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.8);
-}
-
-/* Посилання */
+/* Базові стилі для посилань */
 a {
-  font-weight: 500;
-  color: var(--blue);
+  color: var(--accent-purple);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  font-weight: 500;
 }
 
 a:hover {
-  color: var(--pink);
-  border-color: var(--pink-soft);
+  text-decoration: underline;
 }
 
-/* Текст на кшталт "Edit src/App.jsx..." */
-.code-hint {
-  margin-top: 16px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-code {
-  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  background: rgba(197, 179, 255, 0.25);
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-
-/* Низ "Click on the Vite..." */
-.read-the-docs {
-  margin-top: 24px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-/* Трохи адаптиву */
-@media (max-width: 600px) {
-  .main-card {
-    padding: 28px 20px 24px;
-  }
-
-  h1 {
-    font-size: 2.3rem;
-  }
-
-  .logo {
-    height: 4.5rem;
-  }
+/* Невелика анімація для кнопок по замовчуванню (на всяк випадок) */
+button {
+  font-family: inherit;
 }

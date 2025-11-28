@@ -1,42 +1,286 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* src/App.css */
+
+.app-shell {
+  width: 100%;
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 28px 28px 32px;
+  border-radius: var(--border-radius-lg);
+  background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 245, 255, 0.8)
+    );
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 48px);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Header */
+
+.app-header {
+  margin-bottom: 24px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-title {
+  font-size: clamp(2.4rem, 4vw, 3.2rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-pink);
+  text-shadow: 0 4px 18px rgba(255, 91, 189, 0.4);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.app-title span {
+  color: var(--accent-purple);
 }
 
-.card {
-  padding: 2em;
+.app-subtitle {
+  margin-top: 6px;
+  font-size: 0.98rem;
+  color: var(--text-muted);
 }
 
-.read-the-docs {
-  color: #888;
+/* Навігація */
+
+.app-nav {
+  margin-top: 18px;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-tiny);
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast),
+    transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.nav-link-active {
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-lilac));
+  color: white;
+  box-shadow: 0 10px 22px rgba(255, 91, 189, 0.4);
+  transform: translateY(-1px);
+}
+
+.nav-link:hover:not(.nav-link-active) {
+  background: rgba(244, 225, 255, 0.9);
+  color: var(--accent-purple);
+}
+
+/* Main layout */
+
+.app-main {
+  flex: 1;
+  margin-top: 10px;
+}
+
+/* Footer */
+
+.app-footer {
+  margin-top: 24px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: right;
+  opacity: 0.7;
+}
+
+/* ---------- Сторінки ---------- */
+
+.page {
+  background: var(--card-bg-soft);
+  border-radius: var(--border-radius-md);
+  padding: 20px 20px 22px;
+  box-shadow: var(--shadow-tiny);
+}
+
+.page-title {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: var(--accent-purple);
+}
+
+/* List page */
+
+.recipe-list {
+  list-style: none;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recipe-item {
+  background: var(--card-bg);
+  border-radius: 999px;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.recipe-item-title {
+  font-weight: 600;
+}
+
+.recipe-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(186, 151, 255, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.link-secondary {
+  font-size: 0.9rem;
+}
+
+/* Detail page */
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.detail-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.detail-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+
+.btn {
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    background var(--transition-fast), color var(--transition-fast);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-lilac));
+  color: white;
+  box-shadow: 0 10px 22px rgba(255, 91, 189, 0.45);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(255, 91, 189, 0.55);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(124, 77, 255, 0.4);
+  color: var(--accent-purple);
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-outline:hover {
+  background-color: rgba(247, 236, 255, 0.95);
+}
+
+/* danger-btn (Delete) */
+
+.btn-danger {
+  background: rgba(255, 255, 255, 0.95);
+  color: #b3215b;
+  border: 1px solid rgba(255, 104, 157, 0.7);
+}
+
+.btn-danger:hover {
+  background: #ffe1f0;
+  box-shadow: 0 10px 20px rgba(255, 102, 166, 0.4);
+}
+
+/* Form */
+
+.form {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.form-input,
+.form-textarea {
+  border-radius: 12px;
+  border: 1px solid rgba(186, 151, 255, 0.5);
+  padding: 8px 10px;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+  transition: border var(--transition-fast),
+    box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 1px rgba(124, 77, 255, 0.25);
+  background: #ffffff;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Helpers */
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.back-link {
+  margin-top: 14px;
+  font-size: 0.9rem;
 }

@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import './App.css';
+import RecipeListPage from './pages/RecipeListPage.jsx';
+import RecipeDetailPage from './pages/RecipeDetailPage.jsx';
+import RecipeFormPage from './pages/RecipeFormPage.jsx';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="main-card">
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+    <div className="app-shell">
+      <header className="app-header">
+        <h1 className="app-title">
+          COOKBOOK 
+        </h1>
+        <p className="app-subtitle">
+          Best recipe website 💕
         </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+        <nav className="app-nav">
+          <NavLink
+            to="/recipes"
+            end         
+            className={({ isActive }) =>
+              'nav-link ' + (isActive ? 'nav-link-active' : '')
+            }
+          >
+            Recipe list
+          </NavLink>
+
+          <NavLink
+            to="/recipes/new"
+            className={({ isActive }) =>
+              'nav-link ' + (isActive ? 'nav-link-active' : '')
+            }
+          >
+            Add recipe
+          </NavLink>
+        </nav>
+
+      </header>
+
+      <main className="app-main">
+        <Routes>
+          <Route path="/recipes" element={<RecipeListPage />} />
+          <Route path="/recipes/new" element={<RecipeFormPage mode="create" />} />
+          <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+          <Route path="/recipes/:id/edit" element={<RecipeFormPage mode="edit" />} />
+          <Route path="*" element={<Navigate to="/recipes" />} />
+        </Routes>
+      </main>
+
+      <footer className="app-footer">
+        Made by ✨ Natalya ✨
+      </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
