@@ -1,0 +1,65 @@
+/* src/index.css */
+
+/* Reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-gradient: radial-gradient(circle at 0% 0%, #ffe1ff 0, #f3d4ff 25%, #d6ccff 50%, #bad7ff 75%, #ffe6ff 100%);
+  --accent-pink: #ff5bbd;
+  --accent-pink-soft: #ff8ed4;
+  --accent-purple: #7c4dff;
+  --accent-lilac: #c79bff;
+  --text-main: #2a1330;
+  --text-muted: #754b85;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-bg-soft: rgba(255, 255, 255, 0.5);
+  --border-radius-lg: 24px;
+  --border-radius-md: 16px;
+  --shadow-soft: 0 18px 40px rgba(151, 97, 190, 0.35);
+  --shadow-tiny: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --transition-fast: 0.18s ease-out;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* root розтягується на всю висоту */
+#root {
+  flex: 1;
+  display: flex;
+}
+
+/* Базові стилі для посилань */
+a {
+  color: var(--accent-purple);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Невелика анімація для кнопок по замовчуванню (на всяк випадок) */
+button {
+  font-family: inherit;
+}
