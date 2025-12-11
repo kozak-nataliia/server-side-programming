@@ -25,6 +25,10 @@ class UnitSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class RecipeSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(
+        source="category.name", read_only=True
+    )
+    
     class Meta:
         model = Recipe
         fields = "__all__"

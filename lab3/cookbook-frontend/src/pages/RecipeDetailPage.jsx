@@ -95,8 +95,8 @@ function RecipeDetailPage() {
         </div>
 
         <div>
-          <div className="detail-label">Category ID (FK)</div>
-          <div className="detail-value">{recipe.category}</div>
+          <div className="detail-label">Category</div>
+          <div className="detail-value">{recipe.category_name ?? recipe.category ?? "—"}</div>
         </div>
 
         <div>
