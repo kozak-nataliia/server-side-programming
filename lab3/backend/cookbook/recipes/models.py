@@ -1,12 +1,7 @@
 from django.db import models
 from django.utils import timezone
-# verbose_name - зрозумілий людині опис поля
-# primary_key - ознака первинного ключа
-# unique - ознака унікальності поля
-# blank - ознака того, що поле може бути порожнім
-# null - ознака того, що поле може мати значення NULL
-# default - значення поля за замовчуванням
-# db_index - в б.д. створиться індекс для цього поля
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(default=timezone.now, editable=False)
@@ -93,3 +88,47 @@ class RecipeItem(TimeStampedModel):
     def __str__(self) -> str:
         u = f" {self.unit}" if self.unit else ""
         return f"{self.quantity}{u} {self.ingredient} for {self.recipe}"
+    
+class RecipeComment(TimeStampedModel):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="recipe_comments",
+    )
+    text = models.TextField()
+    rating = models.PositiveSmallIntegerField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Comment by {self.user} on {self.recipe}"
+
+
+class FavoriteRecipe(TimeStampedModel):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="favorite_recipes",
+    )
+
+    class Meta:
+        unique_together = [("recipe", "user")]
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["recipe"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} ♥ {self.recipe}"
+

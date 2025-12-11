@@ -53,6 +53,8 @@ from .models import (
     Ingredient,
     Recipe,
     RecipeItem,
+    RecipeComment, 
+    FavoriteRecipe, 
 )
 
 
@@ -85,6 +87,15 @@ class RecipeItemRepo(BaseRepository[RecipeItem]):
     def __init__(self) -> None:
         super().__init__(RecipeItem)
 
+class RecipeCommentRepo(BaseRepository[RecipeComment]):
+    def __init__(self) -> None:
+        super().__init__(RecipeComment)
+
+
+class FavoriteRecipeRepo(BaseRepository[FavoriteRecipe]):
+    def __init__(self) -> None:
+        super().__init__(FavoriteRecipe)
+
 
 class RepositoryHub:
     """
@@ -98,6 +109,8 @@ class RepositoryHub:
         self.ingredients = IngredientRepo()
         self.recipes = RecipeRepo()
         self.items = RecipeItemRepo()
+        self.recipe_comments = RecipeCommentRepo()  
+        self.favorites = FavoriteRecipeRepo()
 
     def delete_all(self) -> None:
         with connection.cursor() as cursor:
@@ -108,6 +121,8 @@ class RepositoryHub:
                     recipes_ingredient,
                     recipes_unit,
                     recipes_ingredientcategory,
-                    recipes_recipecategory
+                    recipes_recipecategory,
+                    recipes_recipecomment,
+                    recipes_favoriterecipe
                 RESTART IDENTITY CASCADE;
             """)

@@ -6,6 +6,7 @@ import RecipeFormPage from "./pages/RecipeFormPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";         
 import ProtectedRoute from "./auth/ProtectedRoute.jsx"; 
 import { useAuth } from "./auth/AuthContext.jsx";       
+import MyFavoritesPage from "./pages/MyFavoritesPage.jsx";
 
 function App() {
   const { token, logout } = useAuth(); // 🔹 знаємо, залогінений юзер чи ні
@@ -36,6 +37,15 @@ function App() {
               }
             >
               Add recipe
+            </NavLink>
+
+            <NavLink
+                to="/favorites"
+                className={({ isActive }) =>
+                  "nav-link " + (isActive ? "nav-link-active" : "")
+                }
+              >
+                My favorites
             </NavLink>
 
             <button className="nav-link nav-logout" onClick={logout}>
@@ -80,6 +90,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute>
+                <MyFavoritesPage />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* все інше перекидаємо на список рецептів */}
           <Route path="*" element={<Navigate to="/recipes" />} />

@@ -1,9 +1,12 @@
 from rest_framework import viewsets
 from recipes.API.serializers import IngredientSerializer
 from recipes.API.manage_api import ingredient_manager
+from recipes.API.permissions import IsAdminOrReadOnly
+
 
 class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
         return ingredient_manager.list(order_by=["id"])
