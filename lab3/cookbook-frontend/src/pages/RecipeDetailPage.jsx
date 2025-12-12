@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = "http://127.0.0.1:8000/api";
+const COMMENTS_PER_PAGE = 4;
 
 function RecipeDetailPage() {
   const { id } = useParams();
@@ -18,12 +19,13 @@ function RecipeDetailPage() {
   const [commentsError, setCommentsError] = useState("");
   const [newCommentText, setNewCommentText] = useState("");
   const [newCommentRating, setNewCommentRating] = useState("");
+  const [commentsPage, setCommentsPage] = useState(1);
 
   const [favorite, setFavorite] = useState(null); // null = unknown, true/false = state
   const [favLoading, setFavLoading] = useState(false);
   const [favError, setFavError] = useState("");
 
-  // load recipe itself (still behind auth, like before)
+  // load recipe (auth required)
   useEffect(() => {
     if (!token) return;
 
@@ -58,7 +60,7 @@ function RecipeDetailPage() {
     load();
   }, [id, token, logout]);
 
-  // load comments (public) + favorite state (for logged-in user)
+  // load comments (public) + favorite state
   useEffect(() => {
     async function loadExtras() {
       // comments
@@ -71,6 +73,7 @@ function RecipeDetailPage() {
         }
         const data = await res.json();
         setComments(data);
+        setCommentsPage(1);
       } catch (e) {
         setCommentsError(e.message || "Error loading comments");
       } finally {
@@ -113,6 +116,17 @@ function RecipeDetailPage() {
 
     loadExtras();
   }, [id, token, logout]);
+
+  // clamp comments page when number of comments changes
+  useEffect(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil(comments.length / COMMENTS_PER_PAGE)
+    );
+    if (commentsPage > totalPages) {
+      setCommentsPage(totalPages);
+    }
+  }, [comments, commentsPage]);
 
   async function handleDelete(e) {
     e.preventDefault();
@@ -203,9 +217,11 @@ function RecipeDetailPage() {
       }
 
       const data = await res.json();
-      setComments((prev) => [data, ...prev]); // new comment first
+      // new comment first
+      setComments((prev) => [data, ...prev]);
       setNewCommentText("");
       setNewCommentRating("");
+      setCommentsPage(1);
     } catch (e) {
       setCommentsError(e.message || "Error adding comment");
     }
@@ -244,151 +260,201 @@ function RecipeDetailPage() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!recipe) return <p>Recipe not found.</p>;
 
+  const totalCommentPages = Math.max(
+    1,
+    Math.ceil(comments.length / COMMENTS_PER_PAGE)
+  );
+  const startIndex = (commentsPage - 1) * COMMENTS_PER_PAGE;
+  const paginatedComments = comments.slice(
+    startIndex,
+    startIndex + COMMENTS_PER_PAGE
+  );
+
   return (
     <section className="page">
       <h2 className="page-title">Recipe details</h2>
 
-      <div className="detail-grid">
-        <div>
-          <div className="detail-label">Title</div>
-          <div className="detail-value">{recipe.title}</div>
-        </div>
+      <div className="detail-layout">
+        {/* LEFT: recipe info + actions */}
+        <div className="detail-main">
+          <div className="detail-grid">
+            <div>
+              <div className="detail-label">Title</div>
+              <div className="detail-value">{recipe.title}</div>
+            </div>
 
-        <div>
-          <div className="detail-label">Instructions</div>
-          <div className="detail-value">{recipe.instructions}</div>
-        </div>
+            <div>
+              <div className="detail-label">Instructions</div>
+              <div className="detail-value">{recipe.instructions}</div>
+            </div>
 
-        <div>
-          <div className="detail-label">Category</div>
-          <div className="detail-value">
-            {recipe.category_name ?? recipe.category ?? "—"}
+            <div>
+              <div className="detail-label">Category</div>
+              <div className="detail-value">
+                {recipe.category_name ?? recipe.category ?? "—"}
+              </div>
+            </div>
+
+            <div>
+              <div className="detail-label">Created at</div>
+              <div className="detail-value">{recipe.created_at}</div>
+            </div>
+
+            <div>
+              <div className="detail-label">Updated at</div>
+              <div className="detail-value">{recipe.updated_at}</div>
+            </div>
+          </div>
+
+          <div className="favorite-section">
+            {token ? (
+              <button
+                type="button"
+                className={`btn favorite-btn ${favorite ? "active" : ""}`}
+                onClick={handleToggleFavorite}
+                disabled={favLoading}
+              >
+                {favorite ? "★ In favorites" : "☆ Add to favorites"}
+              </button>
+            ) : (
+              <p className="muted-text">
+                Log in to save this recipe to favorites.
+              </p>
+            )}
+            {favError && <p className="form-error">{favError}</p>}
+          </div>
+
+          <div className="detail-actions">
+            <Link to={`/recipes/${recipe.id}`}>{/* just to use id */}</Link>
+
+            <Link to={`/recipes/${recipe.id}/edit`}>
+              <button type="button" className="btn btn-primary">
+                Edit
+              </button>
+            </Link>
+
+            <form onSubmit={handleDelete}>
+              <input type="hidden" name="recipeId" value={recipe.id} />
+              <button type="submit" className="btn btn-danger">
+                Delete
+              </button>
+            </form>
+          </div>
+
+          <div className="back-link">
+            <Link to="/recipes">← Back to list</Link>
           </div>
         </div>
 
-        <div>
-          <div className="detail-label">Created at</div>
-          <div className="detail-value">{recipe.created_at}</div>
-        </div>
+        {/* RIGHT: comments + add comment */}
+        <div className="detail-comments">
+          <section className="comments-section">
+            <h3>Comments</h3>
 
-        <div>
-          <div className="detail-label">Updated at</div>
-          <div className="detail-value">{recipe.updated_at}</div>
-        </div>
-      </div>
+            {commentsLoading && <p>Loading comments...</p>}
+            {commentsError && <p className="form-error">{commentsError}</p>}
 
-      <div className="favorite-section">
-        {token ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleToggleFavorite}
-            disabled={favLoading}
-          >
-            {favorite ? "★ In favorites" : "☆ Add to favorites"}
-          </button>
-        ) : (
-          <p className="muted-text">Log in to save this recipe to favorites.</p>
-        )}
-        {favError && <p className="form-error">{favError}</p>}
-      </div>
+            {!commentsLoading && comments.length === 0 && (
+              <p>No comments yet.</p>
+            )}
 
-      <section className="comments-section">
-        <h3>Comments</h3>
+            {comments.length > 0 && (
+              <>
+                <ul className="comment-list">
+                  {paginatedComments.map((c) => (
+                    <li key={c.id} className="comment-item">
+                      <div className="comment-header">
+                        <strong>{c.user}</strong>
+                        {c.rating != null && (
+                          <span className="comment-rating">
+                            Rating: {c.rating}/5
+                          </span>
+                        )}
+                        <span className="comment-date">
+                          {c.created_at
+                            ? new Date(c.created_at).toLocaleString()
+                            : ""}
+                        </span>
+                      </div>
+                      <p className="comment-text">{c.text}</p>
+                      {user && (user.username === c.user || user.is_staff) && (
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm"
+                          onClick={() => handleDeleteComment(c.id)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
 
-        {commentsLoading && <p>Loading comments...</p>}
-        {commentsError && <p className="form-error">{commentsError}</p>}
-
-        {!commentsLoading && comments.length === 0 && (
-          <p>No comments yet.</p>
-        )}
-
-        <ul className="comment-list">
-          {comments.map((c) => (
-            <li key={c.id} className="comment-item">
-              <div className="comment-header">
-                <strong>{c.user}</strong>
-                {c.rating != null && (
-                  <span className="comment-rating">Rating: {c.rating}/5</span>
+                {comments.length > COMMENTS_PER_PAGE && (
+                  <div className="pagination pagination-sm">
+                    <button
+                      type="button"
+                      className="pagination-btn"
+                      disabled={commentsPage === 1}
+                      onClick={() => setCommentsPage((p) => p - 1)}
+                    >
+                      Prev
+                    </button>
+                    <span className="pagination-info">
+                      Page {commentsPage} of {totalCommentPages}
+                    </span>
+                    <button
+                      type="button"
+                      className="pagination-btn"
+                      disabled={commentsPage === totalCommentPages}
+                      onClick={() => setCommentsPage((p) => p + 1)}
+                    >
+                      Next
+                    </button>
+                  </div>
                 )}
-                <span className="comment-date">
-                  {c.created_at
-                    ? new Date(c.created_at).toLocaleString()
-                    : ""}
-                </span>
-              </div>
-              <p className="comment-text">{c.text}</p>
-              {user && (user.username === c.user || user.is_staff) && (
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm"
-                  onClick={() => handleDeleteComment(c.id)}
-                >
-                  Delete
+              </>
+            )}
+
+            {token ? (
+              <form onSubmit={handleAddComment} className="comment-form">
+                <div className="form-group">
+                  <label htmlFor="comment-text">Add a comment</label>
+                  <textarea
+                    id="comment-text"
+                    className="form-input"
+                    value={newCommentText}
+                    onChange={(e) => setNewCommentText(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="comment-rating">Rating (optional)</label>
+                  <select
+                    id="comment-rating"
+                    className="form-input"
+                    value={newCommentRating}
+                    onChange={(e) => setNewCommentRating(e.target.value)}
+                  >
+                    <option value="">No rating</option>
+                    <option value="1">1 – Bad</option>
+                    <option value="2">2</option>
+                    <option value="3">3 – Okay</option>
+                    <option value="4">4</option>
+                    <option value="5">5 – Great</option>
+                  </select>
+                </div>
+
+                <button type="submit" className="btn btn-primary">
+                  Submit comment
                 </button>
-              )}
-            </li>
-          ))}
-        </ul>
-
-        {token ? (
-          <form onSubmit={handleAddComment} className="comment-form">
-            <div className="form-group">
-              <label htmlFor="comment-text">Add a comment</label>
-              <textarea
-                id="comment-text"
-                className="form-input"
-                value={newCommentText}
-                onChange={(e) => setNewCommentText(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="comment-rating">Rating (optional)</label>
-              <select
-                id="comment-rating"
-                className="form-input"
-                value={newCommentRating}
-                onChange={(e) => setNewCommentRating(e.target.value)}
-              >
-                <option value="">No rating</option>
-                <option value="1">1 – Bad</option>
-                <option value="2">2</option>
-                <option value="3">3 – Okay</option>
-                <option value="4">4</option>
-                <option value="5">5 – Great</option>
-              </select>
-            </div>
-
-            <button type="submit" className="btn btn-primary">
-              Submit comment
-            </button>
-          </form>
-        ) : (
-          <p className="muted-text">Log in to write a comment.</p>
-        )}
-      </section>
-
-      <div className="detail-actions">
-        <Link to={`/recipes/${recipe.id}`}>{/* just to use id */}</Link>
-
-        <Link to={`/recipes/${recipe.id}/edit`}>
-          <button type="button" className="btn btn-primary">
-            Edit
-          </button>
-        </Link>
-
-        <form onSubmit={handleDelete}>
-          <input type="hidden" name="recipeId" value={recipe.id} />
-          <button type="submit" className="btn btn-danger">
-            Delete
-          </button>
-        </form>
-      </div>
-
-      <div className="back-link">
-        <Link to="/recipes">← Back to list</Link>
+              </form>
+            ) : (
+              <p className="muted-text">Log in to write a comment.</p>
+            )}
+          </section>
+        </div>
       </div>
     </section>
   );

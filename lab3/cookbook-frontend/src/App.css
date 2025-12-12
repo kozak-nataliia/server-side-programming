@@ -494,3 +494,135 @@
 .btn-sm {
   font-size: 0.8rem;
 }
+
+/* Generic pagination controls */
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination.pagination-sm {
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.pagination-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(171, 129, 255, 0.6);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  min-width: 32px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(171, 129, 255, 0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.pagination-btn.is-active {
+  background: linear-gradient(90deg, #ff8ad9, #9b7dff);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(171, 129, 255, 0.45);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+.pagination-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Favorites list items */
+.recipe-list-item {
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-tiny);
+}
+
+.recipe-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipe-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.recipe-actions {
+  flex-shrink: 0;
+}
+
+/* Detail two-column layout: info + comments */
+.detail-layout {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-comments .comments-section {
+  margin-top: -30px;
+  padding-top: 14px;
+  border-top: 1px  rgba(171, 129, 255, 0.35);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 18px;
+  padding-inline: 16px;
+  padding-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(171, 129, 255, 0.28);
+}
+
+@media (max-width: 900px) {
+  .detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail-comments {
+    margin-top: 8px;
+  }
+}
+
+/* Shift comment input fields slightly to the right */
+.comment-form .form-input {
+  margin-left: 12px; /* adjust: 8–16px */
+  max-width: calc(100% - 12px);
+}
+
+/* Force favorites titles to NOT be bold */
+
+.page strong {
+  font-weight: 500;
+}
+
+.favorite-btn {
+  cursor: default;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.favorite-btn.active {
+  background: linear-gradient(90deg, #ff8ad9, #9b7dff);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(171, 129, 255, 0.45);
+  cursor: pointer;
+}
