@@ -119,7 +119,6 @@ function App() {
             }
           />
 
-
           {/* все інше перекидаємо на список рецептів */}
           <Route path="*" element={<Navigate to={token ? "/recipes" : "/login"} />} />
         </Routes>

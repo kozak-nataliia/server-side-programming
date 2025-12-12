@@ -31,6 +31,15 @@ from recipes.API.manage_api import (
     recipe_toggle_favorite_view,
     my_favorites_view,
 )
+from recipes.API.analytics_api import (
+    top_recipes_by_favorites_df,
+    recipe_ratings_df,
+    ingredient_usage_df,
+    recipes_by_ingredient_count_df,
+    comments_by_month_df,
+    unit_usage_df,
+)
+from recipes.views import analytics_dashboard
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -68,4 +77,15 @@ urlpatterns = [
         name="recipe-favorite",
     ),
     path("api/me/favorites/", my_favorites_view, name="my-favorites"),
+
+    # pandas analytics (DataFrame in response)
+    path("api/analytics/top-recipes-by-favorites/", top_recipes_by_favorites_df, name="df-top-recipes-by-favorites"),
+    path("api/analytics/recipe-ratings/", recipe_ratings_df, name="df-recipe-ratings"),
+    path("api/analytics/ingredient-usage/", ingredient_usage_df, name="df-ingredient-usage"),
+    path("api/analytics/recipes-by-ingredient-count/", recipes_by_ingredient_count_df, name="df-recipes-by-ingredient-count"),
+    path("api/analytics/comments-by-month/", comments_by_month_df, name="df-comments-by-month"),
+    path("api/analytics/unit-usage/", unit_usage_df, name="df-unit-usage"),
+
+    # plotly dashboard page (Django template)
+    path("dashboard/analytics/", analytics_dashboard, name="analytics-dashboard"),
 ]
