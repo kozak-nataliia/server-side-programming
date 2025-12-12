@@ -22,6 +22,37 @@
 
 .app-header {
   margin-bottom: 24px;
+  position: relative;
+}
+
+/* Username in the right upper corner */
+
+.header-user {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(204, 161, 255, 0.35);
+  box-shadow: var(--shadow-tiny);
+}
+
+.header-user-name {
+  font-weight: 700;
+  color: var(--accent-purple);
+}
+
+.header-user-role {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(244, 225, 255, 0.85);
+  border: 1px solid rgba(204, 161, 255, 0.35);
 }
 
 .app-title {
@@ -75,6 +106,28 @@
 .nav-link:hover:not(.nav-link-active) {
   background: rgba(244, 225, 255, 0.9);
   color: var(--accent-purple);
+}
+
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 8px;
+  margin-left: 4px;
+}
+
+.nav-user-name {
+  font-weight: 600;
+  color: var(--accent-purple);
+}
+
+.nav-user-role {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(244, 225, 255, 0.85);
+  border: 1px solid rgba(204, 161, 255, 0.35);
 }
 
 /* Main layout */
@@ -614,15 +667,3 @@
   font-weight: 500;
 }
 
-.favorite-btn {
-  cursor: default;
-  box-shadow: none;
-  cursor: pointer;
-}
-
-.favorite-btn.active {
-  background: linear-gradient(90deg, #ff8ad9, #9b7dff);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(171, 129, 255, 0.45);
-  cursor: pointer;
-}

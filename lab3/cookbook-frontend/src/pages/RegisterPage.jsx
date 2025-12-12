@@ -4,11 +4,12 @@ import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -19,17 +20,23 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/token/`, {
+      const res = await fetch(`${API_BASE}/auth/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username,
+          password,
+          email: email.trim() || undefined,
+        }),
       });
 
-      if (!res.ok) throw new Error("Invalid username or password");
-
       const data = await res.json();
-      login(data.token);
+      if (!res.ok) {
+        throw new Error(data?.detail || "Registration failed");
+      }
 
+      // backend returns token → log in instantly
+      login(data.token);
       navigate("/recipes");
     } catch (err) {
       setError(err.message);
@@ -41,8 +48,8 @@ const LoginPage = () => {
   return (
     <section className="login-page">
       <div className="login-card">
-        <h2 className="page-title">Login</h2>
-        <p className="text-muted">Log in to open your secret cookbook ✨</p>
+        <h2 className="page-title">Create account</h2>
+        <p className="text-muted">Sign up and save your favorite recipes ✨</p>
 
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-row">
@@ -53,6 +60,16 @@ const LoginPage = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               placeholder="natalya"
+            />
+          </div>
+
+          <div className="form-row">
+            <label className="form-label">Email (optional)</label>
+            <input
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
             />
           </div>
 
@@ -70,21 +87,17 @@ const LoginPage = () => {
 
           {error && <p className="form-error">{error}</p>}
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Log in"}
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? "Creating..." : "Create account"}
           </button>
         </form>
 
         <p className="text-muted" style={{ marginTop: 12 }}>
-          No account yet? <Link to="/register">Create one</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>
     </section>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

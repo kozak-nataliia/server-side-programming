@@ -4,12 +4,13 @@ import RecipeListPage from "./pages/RecipeListPage.jsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.jsx";
 import RecipeFormPage from "./pages/RecipeFormPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";         
+import RegisterPage from "./pages/RegisterPage.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx"; 
 import { useAuth } from "./auth/AuthContext.jsx";       
 import MyFavoritesPage from "./pages/MyFavoritesPage.jsx";
 
 function App() {
-  const { token, logout } = useAuth(); // 🔹 знаємо, залогінений юзер чи ні
+  const { token, user, isAdmin, logout } = useAuth();
 
   return (
     <div className="app-shell">
@@ -19,39 +20,49 @@ function App() {
 
         {/* навігація показується тільки коли є токен */}
         {token && (
-          <nav className="app-nav">
-            <NavLink
-              to="/recipes"
-              end
-              className={({ isActive }) =>
-                "nav-link " + (isActive ? "nav-link-active" : "")
-              }
-            >
-              Recipe list
-            </NavLink>
+          <>
+            {/* user badge in the top-right corner */}
+            <div className="header-user" title={isAdmin ? "Admin" : "User"}>
+              <span className="header-user-name">{user?.username}</span>
+              <span className="header-user-role">{isAdmin ? "admin" : "user"}</span>
+            </div>
 
-            <NavLink
-              to="/recipes/new"
-              className={({ isActive }) =>
-                "nav-link " + (isActive ? "nav-link-active" : "")
-              }
-            >
-              Add recipe
-            </NavLink>
+            <nav className="app-nav">
+              <NavLink
+                to="/recipes"
+                end
+                className={({ isActive }) =>
+                  "nav-link " + (isActive ? "nav-link-active" : "")
+                }
+              >
+                Recipe list
+              </NavLink>
 
-            <NavLink
+              {isAdmin && (
+                <NavLink
+                  to="/recipes/new"
+                  className={({ isActive }) =>
+                    "nav-link " + (isActive ? "nav-link-active" : "")
+                  }
+                >
+                  Add recipe
+                </NavLink>
+              )}
+
+              <NavLink
                 to="/favorites"
                 className={({ isActive }) =>
                   "nav-link " + (isActive ? "nav-link-active" : "")
                 }
               >
                 My favorites
-            </NavLink>
+              </NavLink>
 
-            <button className="nav-link nav-logout" onClick={logout}>
-              Log out
-            </button>
-          </nav>
+              <button className="nav-link nav-logout" onClick={logout}>
+                Log out
+              </button>
+            </nav>
+          </>
         )}
       </header>
 
@@ -59,6 +70,7 @@ function App() {
         <Routes>
           {/* публічна сторінка логіну */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* далі – все під авторизацією */}
           <Route
@@ -73,19 +85,26 @@ function App() {
           <Route
             path="/recipes/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin={true}>
                 <RecipeFormPage mode="create" />
               </ProtectedRoute>
             }
           />
 
-          <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+          <Route
+            path="/recipes/:id"
+            element={
+              <ProtectedRoute>
+                <RecipeDetailPage />
+              </ProtectedRoute>
+            }
+          />
 
 
           <Route
             path="/recipes/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin={true}>
                 <RecipeFormPage mode="edit" />
               </ProtectedRoute>
             }
@@ -102,7 +121,7 @@ function App() {
 
 
           {/* все інше перекидаємо на список рецептів */}
-          <Route path="*" element={<Navigate to="/recipes" />} />
+          <Route path="*" element={<Navigate to={token ? "/recipes" : "/login"} />} />
         </Routes>
       </main>
 

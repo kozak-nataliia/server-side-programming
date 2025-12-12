@@ -8,7 +8,7 @@ const COMMENTS_PER_PAGE = 4;
 function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, user, logout } = useAuth();
+  const { token, user, isAdmin, logout } = useAuth();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -310,7 +310,7 @@ function RecipeDetailPage() {
             {token ? (
               <button
                 type="button"
-                className={`btn favorite-btn ${favorite ? "active" : ""}`}
+                className="btn btn-secondary"
                 onClick={handleToggleFavorite}
                 disabled={favLoading}
               >
@@ -324,22 +324,22 @@ function RecipeDetailPage() {
             {favError && <p className="form-error">{favError}</p>}
           </div>
 
-          <div className="detail-actions">
-            <Link to={`/recipes/${recipe.id}`}>{/* just to use id */}</Link>
+          {isAdmin && (
+            <div className="detail-actions">
+              <Link to={`/recipes/${recipe.id}/edit`}>
+                <button type="button" className="btn btn-primary">
+                  Edit
+                </button>
+              </Link>
 
-            <Link to={`/recipes/${recipe.id}/edit`}>
-              <button type="button" className="btn btn-primary">
-                Edit
-              </button>
-            </Link>
-
-            <form onSubmit={handleDelete}>
-              <input type="hidden" name="recipeId" value={recipe.id} />
-              <button type="submit" className="btn btn-danger">
-                Delete
-              </button>
-            </form>
-          </div>
+              <form onSubmit={handleDelete}>
+                <input type="hidden" name="recipeId" value={recipe.id} />
+                <button type="submit" className="btn btn-danger">
+                  Delete
+                </button>
+              </form>
+            </div>
+          )}
 
           <div className="back-link">
             <Link to="/recipes">← Back to list</Link>
