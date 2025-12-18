@@ -7,7 +7,7 @@ from django.db.models import Avg, Count, F, Q, Sum, DecimalField, Value
 from django.db.models.functions import Coalesce, TruncMonth
 
 
-from .models import FavoriteRecipe, Ingredient, Recipe, RecipeComment, RecipeItem, Unit
+from .models import FavoriteRecipe, Ingredient, Recipe, RecipeComment, RecipeItem, Unit, RecipeCategory
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,11 @@ class AnalyticsRepository:
     Each method returns a QuerySet of dict-like rows (via .values / .values_list).
     The API layer converts them to pandas DataFrames.
     """
+
+
+    # 0) Reference data for filters (categories)
+    def list_recipe_categories(self):
+        return RecipeCategory.objects.all().order_by('name')
 
     # 1) Top recipes by favorites (group by recipe, join favorites)
     def top_recipes_by_favorites(self, *, limit: int = 10, filters: AnalyticsFilters | None = None):

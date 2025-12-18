@@ -17,7 +17,6 @@ from bokeh.resources import CDN
 from bokeh.models import ColumnDataSource
 
 from .analytics import AnalyticsFilters, AnalyticsRepository
-from .models import RecipeCategory
 from .db_benchmark import run_benchmark
 
 
@@ -63,7 +62,7 @@ def analytics_dashboard(request: HttpRequest) -> HttpResponse:
     min_recipes = _int(request, "min_recipes", 1)
     months = _int(request, "months", 12)
 
-    categories = RecipeCategory.objects.all().order_by("name")
+    categories = analytics_repo.list_recipe_categories()
 
     # 1) favorites
     df_fav = pd.DataFrame(list(analytics_repo.top_recipes_by_favorites(limit=limit, filters=filters)))
@@ -297,7 +296,7 @@ def analytics_dashboard_v2_bokeh(request: HttpRequest) -> HttpResponse:
     scripts_divs = [components(p) for p in [p1, p2, p3, p4, p5, p6]]
 
     context = {
-        "categories": RecipeCategory.objects.all().order_by("name"),
+        "categories": analytics_repo.list_recipe_categories(),
         "filters": filters,
         "limit": limit,
         "min_comments": min_comments,
