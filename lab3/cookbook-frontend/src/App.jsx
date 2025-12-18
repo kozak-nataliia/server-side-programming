@@ -39,16 +39,14 @@ function App() {
                 Recipe list
               </NavLink>
 
-              {isAdmin && (
-                <NavLink
-                  to="/recipes/new"
-                  className={({ isActive }) =>
-                    "nav-link " + (isActive ? "nav-link-active" : "")
-                  }
-                >
-                  Add recipe
-                </NavLink>
-              )}
+              <NavLink
+                to="/recipes/new"
+                className={({ isActive }) =>
+                  "nav-link " + (isActive ? "nav-link-active" : "")
+                }
+              >
+                Add recipe
+              </NavLink>
 
               <NavLink
                 to="/favorites"
@@ -59,12 +57,14 @@ function App() {
                 My favorites
               </NavLink>
 
-              <NavLink
-                to="/analytics"
-                className={({ isActive }) => "nav-link " + (isActive ? "nav-link-active" : "")}
-              >
-                Analytics
-              </NavLink>
+              {isAdmin && (
+                <NavLink
+                  to="/analytics"
+                  className={({ isActive }) => "nav-link " + (isActive ? "nav-link-active" : "")}
+                >
+                  Analytics
+                </NavLink>
+              )}
 
               <button className="nav-link nav-logout" onClick={logout}>
                 Log out
@@ -93,7 +93,7 @@ function App() {
           <Route
             path="/recipes/new"
             element={
-              <ProtectedRoute requireAdmin={true}>
+              <ProtectedRoute>
                 <RecipeFormPage mode="create" />
               </ProtectedRoute>
             }
@@ -112,7 +112,7 @@ function App() {
           <Route
             path="/recipes/:id/edit"
             element={
-              <ProtectedRoute requireAdmin={true}>
+              <ProtectedRoute>
                 <RecipeFormPage mode="edit" />
               </ProtectedRoute>
             }
@@ -130,7 +130,7 @@ function App() {
           <Route
             path="/analytics"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin={true}>
                 <AnalyticsPage />
               </ProtectedRoute>
             }

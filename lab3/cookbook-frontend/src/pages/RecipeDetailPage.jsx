@@ -8,7 +8,7 @@ const COMMENTS_PER_PAGE = 4;
 function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, user, isAdmin, logout } = useAuth();
+  const { token, user, logout } = useAuth();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -324,8 +324,7 @@ function RecipeDetailPage() {
             {favError && <p className="form-error">{favError}</p>}
           </div>
 
-          {isAdmin && (
-            <div className="detail-actions">
+          <div className="detail-actions">
               <Link to={`/recipes/${recipe.id}/edit`}>
                 <button type="button" className="btn btn-primary">
                   Edit
@@ -338,8 +337,7 @@ function RecipeDetailPage() {
                   Delete
                 </button>
               </form>
-            </div>
-          )}
+          </div>
 
           <div className="back-link">
             <Link to="/recipes">← Back to list</Link>

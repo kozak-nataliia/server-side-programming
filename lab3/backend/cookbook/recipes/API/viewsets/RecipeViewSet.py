@@ -2,10 +2,18 @@ from rest_framework import viewsets
 from recipes.API.serializers import RecipeSerializer
 from recipes.API.manage_api import recipe_manager
 from recipes.API.permissions import IsAdminOrReadOnly
+from rest_framework.pagination import PageNumberPagination
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
-    permission_classes = [IsAdminOrReadOnly]
+
+    class Pagination(PageNumberPagination):
+        page_size = 12
+        page_size_query_param = "page_size"  # optional override
+        max_page_size = 50
+
+    pagination_class = Pagination
 
     def get_queryset(self):
         return recipe_manager.list(order_by=["title"])

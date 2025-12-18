@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from recipes.API.permissions import IsAdminOrReadOnly
 
 from recipes.analytics import AnalyticsFilters, AnalyticsRepository
 
@@ -62,7 +63,7 @@ def _df_response(df: pd.DataFrame, *, stats_columns: Optional[list[str]] = None)
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def top_recipes_by_favorites_df(request):
     limit = _int(request.query_params, "limit", 10)
     rows = list(analytics_repo.top_recipes_by_favorites(limit=limit, filters=_filters(request.query_params)))
@@ -71,7 +72,7 @@ def top_recipes_by_favorites_df(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def recipe_ratings_df(request):
     min_comments = _int(request.query_params, "min_comments", 1)
     min_avg = _float(request.query_params, "min_avg_rating", 0.0)
@@ -87,7 +88,7 @@ def recipe_ratings_df(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def ingredient_usage_df(request):
     min_recipes = _int(request.query_params, "min_recipes", 1)
     rows = list(analytics_repo.ingredient_usage(min_recipes=min_recipes))
@@ -96,7 +97,7 @@ def ingredient_usage_df(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def recipes_by_ingredient_count_df(request):
     min_items = _int(request.query_params, "min_items", 1)
     rows = list(analytics_repo.recipes_by_ingredient_count(min_items=min_items, filters=_filters(request.query_params)))
@@ -105,7 +106,7 @@ def recipes_by_ingredient_count_df(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def comments_by_month_df(request):
     months = _int(request.query_params, "months", 12)
     rows = list(analytics_repo.comments_by_month(months=months, filters=_filters(request.query_params)))
@@ -117,7 +118,7 @@ def comments_by_month_df(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminOrReadOnly])
 def unit_usage_df(request):
     min_items = _int(request.query_params, "min_items", 1)
     rows = list(analytics_repo.unit_usage(min_items=min_items))

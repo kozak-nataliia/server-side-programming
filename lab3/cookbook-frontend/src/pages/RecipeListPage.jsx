@@ -3,85 +3,75 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = "http://127.0.0.1:8000/api";
-const RECIPES_PER_PAGE = 12;
+const PAGE_SIZE = 12; // must match backend REST_FRAMEWORK["PAGE_SIZE"]
 
 function RecipeListPage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [prevUrl, setPrevUrl] = useState(null);
   const { token, logout } = useAuth();
+
+  async function loadPage(page) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const url = `${API_BASE}/recipes/?page=${page}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.status === 401) {
+        logout();
+        throw new Error("Session expired. Please log in again.");
+      }
+
+      if (!res.ok) throw new Error("Failed to load recipes");
+
+      const data = await res.json();
+
+      // DRF pagination: {count,next,previous,results}
+      if (data && Array.isArray(data.results)) {
+        setRecipes(data.results);
+        setCount(Number(data.count || 0));
+        setNextUrl(data.next);
+        setPrevUrl(data.previous);
+      } else if (Array.isArray(data)) {
+        // fallback if pagination is off (should not happen once backend is fixed)
+        setRecipes(data);
+        setCount(data.length);
+        setNextUrl(null);
+        setPrevUrl(null);
+      } else {
+        throw new Error("Unexpected API response format");
+      }
+
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      setError(e.message || "Error loading recipes");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!token) return;
-
-    async function load() {
-      try {
-        setLoading(true);
-        setError("");
-        const res = await fetch(`${API_BASE}/recipes/`, {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (res.status === 401) {
-          logout();
-          throw new Error("Session expired. Please log in again.");
-        }
-
-        if (!res.ok) {
-          throw new Error("Failed to load recipes");
-        }
-
-        const data = await res.json();
-        setRecipes(data);
-        setCurrentPage(1);
-      } catch (e) {
-        setError(e.message || "Error loading recipes");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, [token, logout]);
-
-  // keep current page in range when number of recipes changes
-  useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(recipes.length / RECIPES_PER_PAGE));
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [recipes, currentPage]);
+    loadPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   if (loading) return <p>Loading recipes...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-  const totalPages = Math.max(1, Math.ceil(recipes.length / RECIPES_PER_PAGE));
-  const startIndex = (currentPage - 1) * RECIPES_PER_PAGE;
-  const visibleRecipes = recipes.slice(
-    startIndex,
-    startIndex + RECIPES_PER_PAGE
-  );
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
     <section className="page">
@@ -95,7 +85,7 @@ function RecipeListPage() {
       )}
 
       <ul className="recipe-list">
-        {visibleRecipes.map((r) => (
+        {recipes.map((r) => (
           <li key={r.id} className="recipe-item">
             <span className="recipe-item-title">{r.title}</span>
             <Link to={`/recipes/${r.id}`} className="link-secondary">
@@ -105,13 +95,13 @@ function RecipeListPage() {
         ))}
       </ul>
 
-      {recipes.length > RECIPES_PER_PAGE && (
+      {count > PAGE_SIZE && (
         <div className="pagination">
           <button
             type="button"
             className="pagination-btn"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
+            onClick={() => loadPage(currentPage - 1)}
+            disabled={!prevUrl || currentPage === 1}
           >
             Prev
           </button>
@@ -126,7 +116,7 @@ function RecipeListPage() {
                   "pagination-btn" +
                   (page === currentPage ? " is-active" : "")
                 }
-                onClick={() => handlePageChange(page)}
+                onClick={() => loadPage(page)}
               >
                 {page}
               </button>
@@ -136,8 +126,8 @@ function RecipeListPage() {
           <button
             type="button"
             className="pagination-btn"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
+            onClick={() => loadPage(currentPage + 1)}
+            disabled={!nextUrl || currentPage === totalPages}
           >
             Next
           </button>

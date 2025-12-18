@@ -6,7 +6,6 @@ from recipes.API.permissions import IsAdminOrReadOnly
 
 class RecipeCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeCategorySerializer
-    permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
         return recipe_cat_manager.list(order_by=["id"])
