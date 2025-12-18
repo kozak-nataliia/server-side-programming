@@ -105,3 +105,17 @@ Examples:
 - `GET /api/analytics/unit-usage/?min_items=5`
 
 Auth: use your existing token or Django session login.
+
+
+## Additional  (parallel DB benchmark)
+
+This lab version adds a DB access benchmark section to the **Plotly dashboard** (`/dashboard/analytics/`).
+It runs **120 (clamped to 100..200)** simple DB queries in parallel using:
+- `ThreadPoolExecutor` (threads)
+- `ProcessPoolExecutor` (processes)
+
+It measures total execution time and shows:
+- line chart: time vs number of workers (threads vs processes)
+- heatmap: threads time vs (workers, batch size)
+
+The best (fastest) configuration among the tested grid is shown above the chart.

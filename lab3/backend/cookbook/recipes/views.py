@@ -2,30 +2,31 @@ from __future__ import annotations
 
 from math import pi
 from typing import Any, Dict, Optional
+from decimal import Decimal
 
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
-from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-
-from .analytics import AnalyticsFilters, AnalyticsRepository
-from .models import RecipeCategory
+from django.contrib.admin.views.decorators import staff_member_required
 
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import CDN
 from bokeh.models import ColumnDataSource
-from django.contrib.admin.views.decorators import staff_member_required
 
-from decimal import Decimal
+from .analytics import AnalyticsFilters, AnalyticsRepository
+from .models import RecipeCategory
+from .db_benchmark import run_benchmark
+
 
 def df_make_json_safe(df: pd.DataFrame) -> pd.DataFrame:
     if df is None or df.empty:
         return df
-    # convert Decimal -> float (or str, but float is better for charts)
+    # convert Decimal -> float (better for charts / serialization)
     return df.applymap(lambda v: float(v) if isinstance(v, Decimal) else v)
+
 
 analytics_repo = AnalyticsRepository()
 
@@ -60,6 +61,7 @@ def analytics_dashboard(request: HttpRequest) -> HttpResponse:
     min_comments = _int(request, "min_comments", 1)
     min_items = _int(request, "min_items", 1)
     min_recipes = _int(request, "min_recipes", 1)
+    months = _int(request, "months", 12)
 
     categories = RecipeCategory.objects.all().order_by("name")
 
@@ -106,7 +108,6 @@ def analytics_dashboard(request: HttpRequest) -> HttpResponse:
     )
 
     # 5) comments trend
-    months = _int(request, "months", 12)
     df_trend = pd.DataFrame(list(analytics_repo.comments_by_month(months=months, filters=filters)))
     if not df_trend.empty and "month" in df_trend.columns:
         df_trend["month"] = pd.to_datetime(df_trend["month"])
@@ -127,6 +128,57 @@ def analytics_dashboard(request: HttpRequest) -> HttpResponse:
         title="Unit usage distribution",
     )
 
+    # 7) DB access benchmark (ONLY in Plotly dashboard)
+    bench_queries = _int(request, "bench_queries", 120)
+    if bench_queries < 100:
+        bench_queries = 100
+    if bench_queries > 200:
+        bench_queries = 200
+
+    workers_grid = [1, 2, 4, 8]
+
+    # a) line: time vs workers for threads and processes (fixed batch_size=10)
+    line_points = []
+    for mode in ("threads", "processes"):
+        for w in workers_grid:
+            pt = run_benchmark(mode=mode, workers=w, batch_size=10, total_queries=bench_queries)
+            line_points.append(pt.__dict__)
+    df_line = pd.DataFrame(line_points)
+
+    fig_db_line = px.line(
+        df_line,
+        x="workers",
+        y="total_sec",
+        color="mode",
+        markers=True,
+        title=f"DB benchmark: total time vs workers (batch=10, queries={bench_queries})",
+        hover_data=["avg_ms", "batch_size"],
+    )
+
+    # b) heatmap: threads only — time vs (workers, batch_size)
+    heat_points = []
+    for batch in (1, 5, 10, 20):
+        for w in workers_grid:
+            pt = run_benchmark(mode="threads", workers=w, batch_size=batch, total_queries=bench_queries)
+            heat_points.append(pt.__dict__)
+    df_heat = pd.DataFrame(heat_points)
+
+    pivot = df_heat.pivot(index="batch_size", columns="workers", values="total_sec")
+    fig_db_heat = px.imshow(
+        pivot,
+        aspect="auto",
+        title=f"DB benchmark heatmap (threads): total time (sec) for queries={bench_queries}",
+        labels={"x": "workers", "y": "batch_size", "color": "total_sec"},
+    )
+
+    all_pts = pd.concat([df_line, df_heat], ignore_index=True)
+    best_row = all_pts.loc[all_pts["total_sec"].idxmin()]
+    best_text = (
+        f"Best (fastest) found: mode={best_row['mode']}, workers={int(best_row['workers'])}, "
+        f"batch_size={int(best_row['batch_size'])}, total={best_row['total_sec']:.3f}s "
+        f"(avg {best_row['avg_ms']:.2f} ms/query)"
+    )
+
     context: Dict[str, Any] = {
         "categories": categories,
         "filters": filters,
@@ -141,9 +193,14 @@ def analytics_dashboard(request: HttpRequest) -> HttpResponse:
         "plot_items": _to_div(fig_items),
         "plot_trend": _to_div(fig_trend),
         "plot_units": _to_div(fig_units),
+        "plot_db_line": _to_div(fig_db_line),
+        "plot_db_heat": _to_div(fig_db_heat),
+        "bench_best": best_text,
+        "bench_queries": bench_queries,
     }
 
     return render(request, "recipes/dashboard.html", context)
+
 
 @staff_member_required
 def analytics_dashboard_v2_bokeh(request: HttpRequest) -> HttpResponse:
@@ -158,9 +215,9 @@ def analytics_dashboard_v2_bokeh(request: HttpRequest) -> HttpResponse:
     filters = AnalyticsFilters(recipe_category_id=int(category_id) if category_id else None, months=months)
 
     # DataFrames (same 6 aggregated queries)
-    df_fav   = df_make_json_safe(pd.DataFrame(list(analytics_repo.top_recipes_by_favorites(limit=limit, filters=filters))))
-    df_rate  = df_make_json_safe(pd.DataFrame(list(analytics_repo.recipe_ratings(min_comments=min_comments, min_avg_rating=0.0, filters=filters))))
-    df_ing   = df_make_json_safe(pd.DataFrame(list(analytics_repo.ingredient_usage(min_recipes=min_recipes))))
+    df_fav = df_make_json_safe(pd.DataFrame(list(analytics_repo.top_recipes_by_favorites(limit=limit, filters=filters))))
+    df_rate = df_make_json_safe(pd.DataFrame(list(analytics_repo.recipe_ratings(min_comments=min_comments, min_avg_rating=0.0, filters=filters))))
+    df_ing = df_make_json_safe(pd.DataFrame(list(analytics_repo.ingredient_usage(min_recipes=min_recipes))))
     df_items = df_make_json_safe(pd.DataFrame(list(analytics_repo.recipes_by_ingredient_count(min_items=min_items, filters=filters))))
     df_trend = df_make_json_safe(pd.DataFrame(list(analytics_repo.comments_by_month(months=months, filters=filters))))
     df_units = df_make_json_safe(pd.DataFrame(list(analytics_repo.unit_usage(min_items=1))))
@@ -202,12 +259,11 @@ def analytics_dashboard_v2_bokeh(request: HttpRequest) -> HttpResponse:
         p5.line(x="month", y="comments_count", source=src, line_width=3)
         p5.circle(x="month", y="comments_count", source=src, size=7)
 
+    # 6) pie-ish: units usage (top 3)
     top = df_units.head(3).copy()
     if top.empty:
-        # optionally show "no data" text instead of a blank plot
         p6 = figure(height=280, title="Unit usage (top 3)", toolbar_location=None)
     else:
-        # IMPORTANT: ensure numeric (avoid Decimal issues)
         top["items_count"] = top["items_count"].astype(float)
 
         top["angle"] = top["items_count"] / top["items_count"].sum() * 2 * pi
@@ -239,6 +295,7 @@ def analytics_dashboard_v2_bokeh(request: HttpRequest) -> HttpResponse:
         p6.grid.grid_line_color = None
 
     scripts_divs = [components(p) for p in [p1, p2, p3, p4, p5, p6]]
+
     context = {
         "categories": RecipeCategory.objects.all().order_by("name"),
         "filters": filters,

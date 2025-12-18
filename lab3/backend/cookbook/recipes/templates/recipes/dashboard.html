@@ -86,6 +86,17 @@
       <div class="card">
         {{ plot_units|safe }}
       </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">DB benchmark (parallel access)</h2>
+        <p class="muted">{{ bench_best }}</p>
+        {{ plot_db_line|safe }}
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">DB benchmark heatmap (threads)</h2>
+        {{ plot_db_heat|safe }}
+      </div>
+
     </div>
   </body>
 </html>
