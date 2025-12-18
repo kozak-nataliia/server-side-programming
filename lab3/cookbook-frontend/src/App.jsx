@@ -8,6 +8,7 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx"; 
 import { useAuth } from "./auth/AuthContext.jsx";       
 import MyFavoritesPage from "./pages/MyFavoritesPage.jsx";
+import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 
 function App() {
   const { token, user, isAdmin, logout } = useAuth();
@@ -56,6 +57,13 @@ function App() {
                 }
               >
                 My favorites
+              </NavLink>
+
+              <NavLink
+                to="/analytics"
+                className={({ isActive }) => "nav-link " + (isActive ? "nav-link-active" : "")}
+              >
+                Analytics
               </NavLink>
 
               <button className="nav-link nav-logout" onClick={logout}>
@@ -115,6 +123,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyFavoritesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
               </ProtectedRoute>
             }
           />

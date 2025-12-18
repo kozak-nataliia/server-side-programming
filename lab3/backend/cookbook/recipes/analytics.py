@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional
 
-from django.db.models import Avg, Count, F, Q, Sum
+from django.db.models import Avg, Count, F, Q, Sum, DecimalField, Value
 from django.db.models.functions import Coalesce, TruncMonth
+
 
 from .models import FavoriteRecipe, Ingredient, Recipe, RecipeComment, RecipeItem, Unit
 
@@ -93,7 +94,7 @@ class AnalyticsRepository:
             Recipe.objects.filter(filters.recipe_q())
             .annotate(
                 ingredients_count=Count("items__ingredient", distinct=True),
-                total_quantity=Coalesce(Sum("items__quantity"), 0),
+                total_quantity=Coalesce(Sum("items__quantity"), Value(0, output_field=DecimalField())),
             )
             .filter(ingredients_count__gte=min_items)  # HAVING
             .values(

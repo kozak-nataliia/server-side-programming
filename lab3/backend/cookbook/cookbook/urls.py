@@ -39,7 +39,7 @@ from recipes.API.analytics_api import (
     comments_by_month_df,
     unit_usage_df,
 )
-from recipes.views import analytics_dashboard
+from recipes.views import analytics_dashboard, analytics_dashboard_v2_bokeh
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
@@ -88,4 +88,5 @@ urlpatterns = [
 
     # plotly dashboard page (Django template)
     path("dashboard/analytics/", analytics_dashboard, name="analytics-dashboard"),
+    path("dashboard/analytics/v2/", analytics_dashboard_v2_bokeh, name="analytics-dashboard-v2"),
 ]

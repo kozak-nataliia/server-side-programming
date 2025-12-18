@@ -142,3 +142,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/dashboard/analytics/"
+LOGOUT_REDIRECT_URL = "/admin/login/"

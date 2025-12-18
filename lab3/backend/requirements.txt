@@ -3,3 +3,4 @@ django
 djangorestframework
 pandas
 plotly
+bokeh
