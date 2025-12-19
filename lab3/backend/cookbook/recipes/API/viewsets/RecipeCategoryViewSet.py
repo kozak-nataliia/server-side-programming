@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from recipes.API.serializers import RecipeCategorySerializer
-from recipes.API.manage_api import recipe_cat_manager
-from recipes.API.permissions import IsAdminOrReadOnly
+from recipes.api.serializers import RecipeCategorySerializer
+from recipes.api.manage_api import recipe_cat_manager
+from recipes.api.permissions import IsAdminOrReadOnly
 
 
 class RecipeCategoryViewSet(viewsets.ModelViewSet):

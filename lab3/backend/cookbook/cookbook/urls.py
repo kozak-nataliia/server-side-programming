@@ -17,12 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from recipes.API.viewsets import (
+from recipes.api.viewsets import (
     IngredientViewSet, RecipeViewSet,
     IngredientCategoryViewSet, RecipeCategoryViewSet,
     UnitViewSet, RecipeItemViewSet,
 )
-from recipes.API.manage_api import (
+from recipes.api.manage_api import (
     recipes_summary_view,
     register_view,
     me_view,
@@ -31,7 +31,7 @@ from recipes.API.manage_api import (
     recipe_toggle_favorite_view,
     my_favorites_view,
 )
-from recipes.API.analytics_api import (
+from recipes.api.analytics_api import (
     top_recipes_by_favorites_df,
     recipe_ratings_df,
     ingredient_usage_df,

@@ -6,22 +6,13 @@ from typing import Any, Dict, Iterable, List, Optional
 from django.db.models import Avg, Count, F, Q, Sum, DecimalField, Value
 from django.db.models.functions import Coalesce, TruncMonth
 
+from recipes.analytics import AnalyticsFilters
 
-from .models import FavoriteRecipe, Ingredient, Recipe, RecipeComment, RecipeItem, Unit, RecipeCategory
+
+from ..models import FavoriteRecipe, Ingredient, Recipe, RecipeComment, RecipeItem, Unit, RecipeCategory
 
 
 @dataclass(frozen=True)
-class AnalyticsFilters:
-    """Filters shared between analytics queries."""
-
-    recipe_category_id: Optional[int] = None
-    months: int = 12
-
-    def recipe_q(self) -> Q:
-        if self.recipe_category_id:
-            return Q(category_id=self.recipe_category_id)
-        return Q()
-
 
 class AnalyticsRepository:
     """6 aggregated ORM queries for the lab.

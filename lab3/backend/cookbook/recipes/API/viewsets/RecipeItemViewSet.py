@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from recipes.API.serializers import RecipeItemSerializer
-from recipes.API.manage_api import recipe_item_manager
-from recipes.API.permissions import IsAdminOrReadOnly
+from recipes.api.serializers import RecipeItemSerializer
+from recipes.api.manage_api import recipe_item_manager
+from recipes.api.permissions import IsAdminOrReadOnly
 
 
 class RecipeItemViewSet(viewsets.ModelViewSet):

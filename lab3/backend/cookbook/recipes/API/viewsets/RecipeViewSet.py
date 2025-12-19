@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from recipes.API.serializers import RecipeSerializer
-from recipes.API.manage_api import recipe_manager
-from recipes.API.permissions import IsAdminOrReadOnly
+from recipes.api.serializers import RecipeSerializer
+from recipes.api.manage_api import recipe_manager
+from recipes.api.permissions import IsAdminOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 
 

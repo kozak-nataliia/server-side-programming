@@ -12,8 +12,8 @@ from datetime import timedelta
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cookbook.settings")
 django.setup()
 
-from recipes.repositories import RepositoryHub
-from recipes.managers import (
+from recipes.repos import RepositoryHub
+from recipes.services import (
     FavoriteRecipeManager,
     RecipeCategoryManager,
     IngredientCategoryManager,

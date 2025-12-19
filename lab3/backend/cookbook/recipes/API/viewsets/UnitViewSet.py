@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from recipes.API.serializers import UnitSerializer
-from recipes.API.manage_api import unit_manager
-from recipes.API.permissions import IsAdminOrReadOnly
+from recipes.api.serializers import UnitSerializer
+from recipes.api.manage_api import unit_manager
+from recipes.api.permissions import IsAdminOrReadOnly
 
 
 class UnitViewSet(viewsets.ModelViewSet):

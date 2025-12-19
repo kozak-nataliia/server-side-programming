@@ -1,5 +1,5 @@
-from recipes.repositories import RepositoryHub
-from recipes.managers import (
+from recipes.repos import RepositoryHub
+from recipes.services import (
     RecipeCategoryManager, IngredientCategoryManager,
     UnitManager, IngredientManager, RecipeManager, RecipeItemManager,
     RecipeCommentManager, FavoriteRecipeManager,
